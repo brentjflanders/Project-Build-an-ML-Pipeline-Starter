@@ -7,7 +7,7 @@ import wandb
 import hydra
 from omegaconf import DictConfig
 
-# testing git commit and push
+# testing git commit and push, 3
 
 _steps = [
     "download",
