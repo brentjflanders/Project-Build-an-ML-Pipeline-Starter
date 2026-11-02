@@ -42,32 +42,52 @@ def go(config: DictConfig):
             _ = mlflow.run(
                 f"{config['main']['components_repository']}/get_data",
                 "main",
-                env_manager="conda",
                 parameters={
                     "sample": config["etl"]["sample"],
-                    "artifact_name": "sample.csv",
-                    "artifact_type": "raw_data",
-                    "artifact_description": "Raw file as downloaded"
+                    "artifact_name": config["my_params"]["download"]["artifact_name"],
+                    "artifact_type": config["my_params"]["download"]["artifact_type"],
+                    "artifact_description": config["my_params"]["download"]["artifact_description"]
                 },
             )
 
         if "basic_cleaning" in active_steps:
-            ##################
-            # Implement here #
-            ##################
-            pass
+            _ = mlflow.run(
+                    os.path.join(hydra.utils.get_original_cwd(), "src", "basic_cleaning"),
+                    "main",
+                    parameters={
+                        "input_artifact": config["my_params"]["basic_cleaning"]["input_artifact"],
+                        "output_artifact": config["my_params"]["basic_cleaning"]["output_artifact"],
+                        "output_type": config["my_params"]["basic_cleaning"]["output_type"],
+                        "output_description": config["my_params"]["basic_cleaning"]["output_description"],
+                        "min_price": config['etl']['min_price'],
+                        "max_price": config['etl']['max_price']
+                    },
+                )
 
         if "data_check" in active_steps:
-            ##################
-            # Implement here #
-            ##################
-            pass
+            _ = mlflow.run(
+                os.path.join(hydra.utils.get_original_cwd(), "src", "data_check"),
+                "main",
+                parameters={
+                    "csv": config["my_params"]["data_check"]["csv"],
+                    "ref": config["my_params"]["data_check"]["ref"],
+                    "kl_threshold": config["data_check"]["kl_threshold"],
+                    "min_price": config["etl"]["min_price"],
+                    "max_price": config["etl"]["max_price"]
+                }
+            )
 
         if "data_split" in active_steps:
-            ##################
-            # Implement here #
-            ##################
-            pass
+            _ = mlflow.run(
+                f"{config['main']['components_repository']}/train_val_test_split",
+                "main",
+                parameters={
+                    "input": config["my_params"]["data_split"]["input"],
+                    "test_size": config["modeling"]["test_size"],
+                    "random_seed": config["modeling"]["random_seed"],
+                    "stratify_by": config["modeling"]["stratify_by"]
+                }
+            )
 
         if "train_random_forest" in active_steps:
 
@@ -79,19 +99,29 @@ def go(config: DictConfig):
             # NOTE: use the rf_config we just created as the rf_config parameter for the train_random_forest
             # step
 
-            ##################
-            # Implement here #
-            ##################
-
-            pass
+            _ = mlflow.run(
+                os.path.join(hydra.utils.get_original_cwd(), "src", "train_random_forest"),
+                "main",
+                parameters={
+                    "trainval_artifact": config["myparams"]["train_random_forest"]["trainval_artifact"],
+                    "val_size": config["modeling"]["val_size"],
+                    "random_seed": config["modeling"]["random_seed"],
+                    "stratify_by": config["modeling"]["stratify_by"],
+                    "rf_config": rf_config,
+                    "max_tfidf_features": config["modeling"]["max_tfidf_features"],
+                    "output_artifact": config["m_params"]["train_random_forest"]["output_artifact"]
+                }
+            )
 
         if "test_regression_model" in active_steps:
-
-            ##################
-            # Implement here #
-            ##################
-
-            pass
+            _ = mlflow.run(
+                f"{config['main']['components_repository']}/test_regression_model",
+                "main",
+                parameters={
+                    "mlflow_model": config["my_params"]["test_regression_model"]["mlflow_model"],
+                    "test_dataset": config["my_params"]["test_regression_model"]["test_dataset"]
+                }
+            )
 
 
 if __name__ == "__main__":

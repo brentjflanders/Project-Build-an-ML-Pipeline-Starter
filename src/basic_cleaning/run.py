@@ -6,6 +6,7 @@ import argparse
 import logging
 import wandb
 import pandas as pd
+import os 
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
@@ -14,19 +15,24 @@ logger = logging.getLogger()
 # DO NOT MODIFY
 def go(args):
 
-    run = wandb.init(job_type="basic_cleaning")
+    logger.info("Intializing Weights & Biases run...")
+    run = wandb.init(job_type="basic_cleaning", project="nyc_airbnb", group="cleaning", save_code=True)
     run.config.update(args)
 
     # Download input artifact. This will also log that this script is using this
     
-    run = wandb.init(project="nyc_airbnb", group="cleaning", save_code=True)
+    #run = wandb.init(project="nyc_airbnb", group="cleaning", save_code=True)
+    logger.info("Writing artifact to df...")
     artifact_local_path = run.use_artifact(args.input_artifact).file()
     df = pd.read_csv(artifact_local_path)
+
     # Drop outliers
+
     min_price = args.min_price
     max_price = args.max_price
     idx = df['price'].between(min_price, max_price)
     df = df[idx].copy()
+
     # Convert last_review to datetime
     df['last_review'] = pd.to_datetime(df['last_review'])
 
@@ -37,6 +43,8 @@ def go(args):
     # ENTER CODE HERE
 
     # Save the cleaned data
+    print(os.getcwd())
+    logger.info("Writing clean_sample.csv...")
     df.to_csv('clean_sample.csv',index=False)
 
     # log the new data.
@@ -44,7 +52,7 @@ def go(args):
      args.output_artifact,
      type=args.output_type,
      description=args.output_description,
- )
+    )
     artifact.add_file("clean_sample.csv")
     run.log_artifact(artifact)
 
