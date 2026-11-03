@@ -103,13 +103,13 @@ def go(config: DictConfig):
                 os.path.join(hydra.utils.get_original_cwd(), "src", "train_random_forest"),
                 "main",
                 parameters={
-                    "trainval_artifact": config["myparams"]["train_random_forest"]["trainval_artifact"],
+                    "trainval_artifact": config["my_params"]["train_random_forest"]["trainval_artifact"],
                     "val_size": config["modeling"]["val_size"],
                     "random_seed": config["modeling"]["random_seed"],
                     "stratify_by": config["modeling"]["stratify_by"],
                     "rf_config": rf_config,
                     "max_tfidf_features": config["modeling"]["max_tfidf_features"],
-                    "output_artifact": config["m_params"]["train_random_forest"]["output_artifact"]
+                    "output_artifact": config["my_params"]["train_random_forest"]["output_artifact"]
                 }
             )
 
