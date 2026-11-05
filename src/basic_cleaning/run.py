@@ -46,8 +46,8 @@ def go(args):
 
     # Save the cleaned data
     print(os.getcwd())
-    logger.info("Writing clean_sample.csv...")
-    df.to_csv('clean_sample.csv',index=False)
+    logger.info("Writing clean_data.csv...")
+    df.to_csv('clean_data.csv',index=False)
 
     # log the new data.
     artifact = wandb.Artifact(
@@ -55,7 +55,7 @@ def go(args):
      type=args.output_type,
      description=args.output_description,
     )
-    artifact.add_file("clean_sample.csv")
+    artifact.add_file("clean_data.csv")
     run.log_artifact(artifact)
 
 
